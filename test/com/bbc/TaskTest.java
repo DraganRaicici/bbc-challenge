@@ -3,22 +3,20 @@ package com.bbc;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.util.*;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+
 public class TaskTest {
 
-    protected HttpURLConnection mHttpURLConnectionMock;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
 
@@ -28,10 +26,6 @@ public class TaskTest {
         System.setErr(new PrintStream(errContent));
     }
 
-    @Before
-    public void setUp() throws Exception {
-        mHttpURLConnectionMock = Mockito.mock(HttpURLConnection.class);
-    }
 
     @After
     public void cleanUpStreams() {
@@ -40,26 +34,117 @@ public class TaskTest {
     }
 
     @Test
-    public void requestingStatusFromValidAvailableAddressShouldReturnOk() throws Exception {
-        Mockito.when(mHttpURLConnectionMock.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
-        String validSite = "http://google.com";
+    public void requestingInfoFromValidAddressShouldReturnWithExpectedValues() {
+
+        String validSite = "http://www.bbc.co.uk/iplayer";
+        String expectedUrl = "http://www.bbc.co.uk/iplayer";
+        String expectedStatusCode = "301";
+        String expectedContentLength = "114";
+
         List<String> addresses = new ArrayList<>();
         addresses.add(validSite);
+
         ThreadStarter ts = ThreadStarter.getInstance();
         ts.start(addresses);
 
-        assertEquals("200", outContent.toString().trim());
+        assertThat(outContent.toString(), containsString(expectedContentLength));
+        assertThat(outContent.toString(), containsString(expectedStatusCode));
+        assertThat(outContent.toString(), containsString(expectedUrl));
     }
+
     @Test
-    public void requestingStatusFromInValidAddressShouldReturnNotFound() throws Exception {
-        Mockito.when(mHttpURLConnectionMock.getResponseCode()).thenReturn(HttpURLConnection.HTTP_NOT_FOUND);
-        String validSite = "http://www.bbc.co.uk/missing/thing";
+    public void requestingInfoFromInValidAddressShouldReturnWithExpectedValues() {
+
+        String invalidSite = "http://www.bbc.co.uk/missing/thing";
+        String expectedUrl = "http://www.bbc.co.uk/missing/thing";
+        String expectedStatusCode = "404";
+
         List<String> addresses = new ArrayList<>();
-        addresses.add(validSite);
+        addresses.add(invalidSite);
+
         ThreadStarter ts = ThreadStarter.getInstance();
         ts.start(addresses);
 
-        assertEquals("404", outContent.toString().trim());
+        assertThat(outContent.toString(), containsString(expectedStatusCode));
+        assertThat(outContent.toString(), containsString(expectedUrl));
     }
 
+    @Test
+    public void requestingInfoFromValidAddressShouldWorkForBothValidProtocols() {
+
+        String httpString = "http://www.bbc.co.uk/missing/thing";
+        String httpsString = "https://google.com";
+        List<String> addresses = new ArrayList<>();
+        addresses.add(httpsString);
+        addresses.add(httpString);
+        ThreadStarter ts = ThreadStarter.getInstance();
+        ts.start(addresses);
+
+        assertThat(outContent.toString(), containsString(httpsString));
+        assertThat(outContent.toString(), containsString(httpString));
+    }
+
+    @Test
+    public void requestingStatusFromValidAddressShouldWorkForBothValidProtocols() {
+
+        String httpString = "http://www.bbc.co.uk/missing/thing";
+        String httpsString = "https://google.com";
+        List<String> addresses = new ArrayList<>();
+        addresses.add(httpsString);
+        addresses.add(httpString);
+        ThreadStarter ts = ThreadStarter.getInstance();
+        ts.start(addresses);
+
+        assertThat(outContent.toString(), containsString(httpsString));
+        assertThat(outContent.toString(), containsString(httpString));
+    }
+
+    @Test
+    public void requestingInfoFromBadUrlShouldBeHandledAccordingly() {
+
+        String badUrl = "bad://address";
+        String expectedError = "Malformed url";
+
+        List<String> addresses = new ArrayList<>();
+        addresses.add(badUrl);
+        ThreadStarter ts = ThreadStarter.getInstance();
+        ts.start(addresses);
+
+        assertThat(outContent.toString(), containsString(badUrl));
+        assertThat(outContent.toString(), containsString(expectedError));
+        assertThat(errContent.toString(), containsString("Malformed URL"));
+    }
+
+    @Test
+    public void requestingInfoFromNonExistentUrlShouldBeHandledAccordingly() {
+
+        String nonExistentUrl = "http://not.exists.bbc.co.uk/";
+        String expectedError = "Non-existent URL";
+
+        List<String> addresses = new ArrayList<>();
+        addresses.add(nonExistentUrl);
+        ThreadStarter ts = ThreadStarter.getInstance();
+        ts.start(addresses);
+
+        assertThat(outContent.toString(), containsString(nonExistentUrl));
+        assertThat(outContent.toString(), containsString(expectedError));
+        assertThat(errContent.toString(), containsString("Url does not exist"));
+    }
+
+
+    @Test
+    public void requestingInfoFromSlowSourcesShouldTimeout() {
+
+        String slowUrl = "http://deelay.me/20000/http://mysite.com/image.gif";
+        String expectedError = "Request timed out automatically after 10 seconds";
+
+        List<String> addresses = new ArrayList<>();
+        addresses.add(slowUrl);
+        ThreadStarter ts = ThreadStarter.getInstance();
+        ts.start(addresses);
+
+        assertThat(outContent.toString(), containsString(slowUrl));
+        assertThat(outContent.toString(), containsString(expectedError));
+        assertThat(errContent.toString(), containsString("Request automatically timed out"));
+    }
 }

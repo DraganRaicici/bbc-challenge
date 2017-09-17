@@ -22,5 +22,6 @@
     <orderEntry type="library" name="byte-buddy-1.7.5" level="project" />
     <orderEntry type="library" name="byte-buddy-agent-1.7.5" level="project" />
     <orderEntry type="library" name="objenesis-2.6" level="project" />
+    <orderEntry type="library" name="org.json:json:20170516" level="project" />
   </component>
 </module>

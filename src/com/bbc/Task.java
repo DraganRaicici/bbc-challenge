@@ -10,54 +10,45 @@ import java.util.Map;
 public class Task implements Runnable {
     private String url;
 
-    public Task (String url) {
+    public Task(String url) {
         this.url = url;
     }
+
     public void run() {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            //Set timeout of 10 seconds.
+            con.setReadTimeout(10000);
+            //
             con.setRequestMethod("GET");
 
             getInfo(con);
 
-        } catch (ProtocolException e) {
-            //createError(url, "invalid protocol");
-            System.err.println("Protocol exception");
-        } catch (MalformedURLException e) {
-           // createError(url, "malformed url");
+        } catch (SocketTimeoutException e) {
+            JSONConverter.createErrorJSON(url, "Request timed out automatically after 10 seconds");
+            System.err.println("Request automatically timed out");
+        }  catch (MalformedURLException e) {
+            JSONConverter.createErrorJSON(url, "Malformed url");
             System.err.println("Malformed URL");
-        } catch(SocketTimeoutException e){
-            System.err.println("Timed-out");
-        }
-        catch (IOException e) {
-            //createError(url, "Non-existant URL");
+        } catch (IOException e) {
+            JSONConverter.createErrorJSON(url, "Non-existent URL");
             System.err.println("Url does not exist");
         }
     }
 
-//    private void createError(String url, String errorReason) {
-//        MyJsonErrorFormat errorJson = new MyJsonErrorFormat(url, errorReason);
-//        System.out.println(errorJson.toString());
-//    }
-
     private void getInfo(HttpURLConnection con) throws IOException {
-        int statusCode = con.getResponseCode();
+        String statusCode = con.getResponseCode() + "";
         Map<String, List<String>> map = con.getHeaderFields();
 
         List<String> contentLength = map.get("Content-Length");
         if (contentLength == null) {
             contentLength = new ArrayList<>();
-            contentLength.add("'Content-Length' missing");
+            contentLength.add("Content-Length missing");
         }
 
         String dateTime = map.get("Date").get(0);
 
-        //createJson(url, statusCode, contentLength.get(0), dateTime);
+        JSONConverter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
     }
-
-//    private void createJson(String url, int statusCode, String contentLength, String dateTime) {
-//        MyJsonFormat json = new MyJsonFormat(url, statusCode + "", contentLength, dateTime);
-//        System.out.println(json.toString());
-//    }
 
 }
