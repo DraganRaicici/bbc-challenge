@@ -17,10 +17,17 @@ public class Task implements Runnable {
     public void run() {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-            //Set timeout of 10 seconds.
-            con.setReadTimeout(10000);
-            //
             con.setRequestMethod("GET");
+            con.setReadTimeout(10000);
+
+            //Handle permanently removed sites.
+            if(con.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM ) {
+                String redirect = con.getHeaderField("Location");
+                if (redirect != null) {
+                    con = (HttpURLConnection) new URL(redirect).openConnection();
+                    System.out.println("Redirected automatically "+url);
+                }
+            }
 
             getInfo(con);
 
@@ -37,10 +44,11 @@ public class Task implements Runnable {
     }
 
     private void getInfo(HttpURLConnection con) throws IOException {
-        String statusCode = con.getResponseCode() + "";
+        String statusCode = con.getResponseCode()+"";
         Map<String, List<String>> map = con.getHeaderFields();
 
         List<String> contentLength = map.get("Content-Length");
+        //Handle some chunk-encoded sites that do not contain content-length.
         if (contentLength == null) {
             contentLength = new ArrayList<>();
             contentLength.add("Content-Length missing");
@@ -50,5 +58,4 @@ public class Task implements Runnable {
 
         JSONConverter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
     }
-
 }
