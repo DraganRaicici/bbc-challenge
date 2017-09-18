@@ -27,7 +27,6 @@ public class Task implements Runnable {
                 String redirect = con.getHeaderField("Location");
                 if (redirect != null) {
                     con = (HttpURLConnection) new URL(redirect).openConnection();
-                    System.out.println("Redirected automatically "+url);
                 }
             }
 
