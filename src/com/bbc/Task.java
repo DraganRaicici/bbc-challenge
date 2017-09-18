@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Task acts as a worker class which executes all the GET requests.
+ */
 public class Task implements Runnable {
     private String url;
 

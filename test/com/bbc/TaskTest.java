@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 
-
 public class TaskTest {
 
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -29,7 +28,7 @@ public class TaskTest {
         System.setOut(null);
         System.setErr(null);
     }
-    
+
     @Test
     public void requestingStatusCodeFromValidAddressShouldReturnWithExpectedResult() {
 
