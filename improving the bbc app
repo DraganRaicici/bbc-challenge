@@ -1,0 +1,6 @@
+Ideas:
+
+- do soemthing about the date, don't get it from the content header map, but from con.getDate() and convert it to date.
+- Custom exception handler to handle all exceptions and refractor the ones existing neatly.
+- add tests for jsonconverter
+- convert task to a interface for easier testing?
