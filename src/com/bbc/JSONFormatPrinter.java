@@ -2,7 +2,7 @@ package com.bbc;
 
 import org.json.*;
 
-public class JSONConverter {
+public class JSONFormatPrinter {
     public static void createValidJSON(String url, String statusCode, String contentLength, String date) {
         JSONObject json = new JSONObject();
         json.put("Url", url);

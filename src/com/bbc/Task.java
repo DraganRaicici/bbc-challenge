@@ -33,13 +33,13 @@ public class Task implements Runnable {
             getInfo(con);
 
         } catch (SocketTimeoutException e) {
-            JSONConverter.createErrorJSON(url, "Request timed out automatically after 10 seconds");
+            JSONFormatPrinter.createErrorJSON(url, "Request timed out automatically after 10 seconds");
             System.err.println("Request automatically timed out");
-        }  catch (MalformedURLException e) {
-            JSONConverter.createErrorJSON(url, "Malformed url");
+        } catch (MalformedURLException e) {
+            JSONFormatPrinter.createErrorJSON(url, "Malformed url");
             System.err.println("Malformed URL");
         } catch (IOException e) {
-            JSONConverter.createErrorJSON(url, "Non-existent URL");
+            JSONFormatPrinter.createErrorJSON(url, "Non-existent URL");
             System.err.println("Url does not exist");
         }
     }
@@ -57,6 +57,6 @@ public class Task implements Runnable {
 
         String dateTime = map.get("Date").get(0);
 
-        JSONConverter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
+        JSONFormatPrinter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
     }
 }
