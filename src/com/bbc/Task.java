@@ -1,5 +1,7 @@
 package com.bbc;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -33,19 +35,22 @@ public class Task implements Runnable {
             getInfo(con);
 
         } catch (SocketTimeoutException e) {
-            JSONFormatPrinter.createErrorJSON(url, "Request timed out automatically after 10 seconds");
+            JSONObject timedOut = JSONFormatPrinter.createInvalidJSON(url, "Request timed out automatically after 10 seconds");
+            JSONFormatPrinter.printJSON(timedOut);
             System.err.println("Request automatically timed out");
         } catch (MalformedURLException e) {
-            JSONFormatPrinter.createErrorJSON(url, "Malformed url");
+            JSONObject malformed =  JSONFormatPrinter.createInvalidJSON(url, "Malformed url");
+            JSONFormatPrinter.printJSON(malformed);
             System.err.println("Malformed URL");
         } catch (IOException e) {
-            JSONFormatPrinter.createErrorJSON(url, "Non-existent URL");
+            JSONObject invalid = JSONFormatPrinter.createInvalidJSON(url, "Non-existent URL");
+            JSONFormatPrinter.printJSON(invalid);
             System.err.println("Url does not exist");
         }
     }
 
     private void getInfo(HttpURLConnection con) throws IOException {
-        String statusCode = con.getResponseCode()+"";
+        String statusCode = con.getResponseCode() + "";
         Map<String, List<String>> map = con.getHeaderFields();
 
         List<String> contentLength = map.get("Content-Length");
@@ -57,6 +62,7 @@ public class Task implements Runnable {
 
         String dateTime = map.get("Date").get(0);
 
-        JSONFormatPrinter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
+        JSONObject valid = JSONFormatPrinter.createValidJSON(url, statusCode, contentLength.get(0), dateTime);
+        JSONFormatPrinter.printJSON(valid);
     }
 }
