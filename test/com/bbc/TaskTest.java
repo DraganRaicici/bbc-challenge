@@ -47,8 +47,8 @@ public class TaskTest {
     @Test
     public void requestingContentLengthFromValidAddressShouldReturnWithExpectedResult() {
 
-        String validSite = "http://www.bbc.co.uk/iplayer";
-        String contentLength = "216880";
+        String validSite = "http://www.httpbin.org";
+        String contentLength = "13129";
 
         List<String> addresses = new ArrayList<>();
         addresses.add(validSite);
@@ -76,10 +76,10 @@ public class TaskTest {
     @Test
     public void requestingInfoFromValidAddressShouldReturnWithExpectedValues() {
 
-        String validSite = "http://www.bbc.co.uk/iplayer";
-        String expectedUrl = "http://www.bbc.co.uk/iplayer";
+        String validSite = "http://www.httpbin.org";
+        String expectedUrl = "http://www.httpbin.org";
         String expectedStatusCode = "200";
-        String expectedContentLength = "216880";
+        String expectedContentLength = "13129";
 
         List<String> addresses = new ArrayList<>();
         addresses.add(validSite);
@@ -160,7 +160,7 @@ public class TaskTest {
     @Test
     public void requestingInfoFromSlowSourcesShouldTimeout() {
 
-        String slowUrl = "http://deelay.me/20000/http://mysite.com/image.gif";
+        String slowUrl = "http://www.deelay.me/20000/http://www.httpbin.org";
         String expectedError = "Request timed out automatically after 10 seconds";
 
         List<String> addresses = new ArrayList<>();
@@ -177,7 +177,7 @@ public class TaskTest {
 
         String notFound = "http://www.bbc.co.uk/missing/thing";
         String valid = "https://google.com";
-        String timedout = "http://deelay.me/20000/http://mysite.com/image.gif";
+        String timedOut = "http://www.deelay.me/20000/http://www.bbc.co.uk/iplayer";
         String badUrl = "bad://address";
         String expectedTimedOutError = "Request timed out automatically after 10 seconds";
         String expectedMalformedError = "Malformed url";
@@ -188,7 +188,7 @@ public class TaskTest {
         List<String> addresses = new ArrayList<>();
         addresses.add(valid);
         addresses.add(notFound);
-        addresses.add(timedout);
+        addresses.add(timedOut);
         addresses.add(badUrl);
         addresses.add(nonExistentUrl);
 
@@ -197,7 +197,7 @@ public class TaskTest {
 
         assertThat(outContent.toString(), containsString(valid));
         assertThat(outContent.toString(), containsString(notFound));
-        assertThat(outContent.toString(), containsString(timedout));
+        assertThat(outContent.toString(), containsString(timedOut));
         assertThat(outContent.toString(), containsString(badUrl));
         assertThat(outContent.toString(), containsString(expectedTimedOutError));
         assertThat(errContent.toString(), containsString("Request automatically timed out"));

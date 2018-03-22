@@ -201,7 +201,7 @@ public class OfflineTaskTest {
         assertThat(outContent.toString(), containsString(expectedStatusCode));
         assertThat(outContent.toString(), containsString(REQUEST_URL));
     }
-    
+
     /**
      * Helper method to create the header map.
      * @param header
